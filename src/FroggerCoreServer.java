@@ -33,6 +33,8 @@ public class FroggerCoreServer{
 			
 	}
 	
+
+	
 	public static void main(String[] args) throws IOException {
 		//playerName = "Anthony";
 		cat1 = null;

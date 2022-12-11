@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 public class ServerService implements Runnable{
 
@@ -11,11 +12,48 @@ public class ServerService implements Runnable{
 		private Scanner in;
 		private Cat cat;
 
+		RowHandler rHandler=null,rHandler2 = null;
+		
+		public void sendCommandToClients(String command) throws UnknownHostException, IOException {
+			int port2 = 0;
+			if(CLIENT_PORT == 5656) {
+				port2 = 5657;
+			}else {
+				port2 = 5656;
+			}
+			
+			
+			Socket s = new Socket("localhost", CLIENT_PORT);
+			
+			//Initialize data stream to send data out
+			OutputStream outstream = s.getOutputStream();
+			PrintWriter out = new PrintWriter(outstream);
+			
+			System.out.println("Sending: " + command);
+			out.println(command);
+			out.flush();
+
+			
+			//send a response to second client
+			s = new Socket("localhost", port2);
+			
+			//Initialize data stream to send data out
+			outstream = s.getOutputStream();
+			out = new PrintWriter(outstream);
+			
+			System.out.println("Sending: " + command);
+			out.println(command);
+			out.flush();
+
+		}
+		
+		
 		public ServerService (Socket aSocket, Cat catInput, int clientPort) {
 			this.s = aSocket;
 			this.cat = catInput;
 			this.CLIENT_PORT = clientPort;
 		}
+		
 		public void run() {
 			
 			try {
@@ -32,6 +70,7 @@ public class ServerService implements Runnable{
 			}
 			
 		}
+		
 		//processing the requests
 		public void processRequest () throws IOException {
 			//if next request is empty then return
@@ -56,6 +95,20 @@ public class ServerService implements Runnable{
 				port2 = 5656;
 			}
 			
+			if(command.equals("END")) {
+				String worl = in.next();
+				switch(worl) {
+				case "LOSE":
+					rHandler.stopMovingCars();
+					rHandler2.stopMovingCars();
+				break;
+				case "WIN":
+					rHandler.stopMovingCars();
+					rHandler2.stopMovingCars();
+				break;
+				}
+				
+			}
 			
 			if(command.equals("GET")) {
 				
@@ -81,7 +134,7 @@ public class ServerService implements Runnable{
 				//Initialize data stream to send data out
 				OutputStream outstream = s.getOutputStream();
 				PrintWriter out = new PrintWriter(outstream);
-				RowHandler rHandler = new RowHandler(outstream, out);
+				rHandler = new RowHandler(outstream, out);
 				rHandler.startMovingCars();
 				
 				//send a response
@@ -90,7 +143,7 @@ public class ServerService implements Runnable{
 				//Initialize data stream to send data out
 				outstream = s2.getOutputStream();
 				out = new PrintWriter(outstream);
-				RowHandler rHandler2 = new RowHandler(outstream, out);
+				rHandler2 = new RowHandler(outstream, out);
 				rHandler2.startMovingCars();
 			}
 			
@@ -101,7 +154,6 @@ public class ServerService implements Runnable{
 				//Initialize data stream to send data out
 				OutputStream outstream = s.getOutputStream();
 				PrintWriter out = new PrintWriter(outstream);
-				RowHandler rHandler = new RowHandler(outstream, out);
 				rHandler.stopMovingCars();
 				
 				//send a response
@@ -110,7 +162,6 @@ public class ServerService implements Runnable{
 				//Initialize data stream to send data out
 				outstream = s2.getOutputStream();
 				out = new PrintWriter(outstream);
-				RowHandler rHandler2 = new RowHandler(outstream, out);
 				rHandler2.stopMovingCars();
 			}
 			
@@ -135,35 +186,8 @@ public class ServerService implements Runnable{
 						break;
 					}
 					
-					//send a response
-					Socket s2 = new Socket("localhost", CLIENT_PORT);
-					
-					//Initialize data stream to send data out
-					OutputStream outstream = s2.getOutputStream();
-					PrintWriter out = new PrintWriter(outstream);
-	
 					String commandOut = "PLAYER " +playerNo+ " " +cat.getX()+ " " +cat.getY()+ "\n";
-					System.out.println("Sending: " + commandOut);
-					out.println(commandOut);
-					out.flush();
-						
-					s2.close();
-
-					
-					//send a response
-					Socket s3 = new Socket("localhost", port2);
-					
-					//Initialize data stream to send data out
-					outstream = s3.getOutputStream();
-					out = new PrintWriter(outstream);
-
-					System.out.println("Sending: " + commandOut);
-					out.println(commandOut);
-					out.flush();
-						
-					s3.close();
-					
-					
+					this.sendCommandToClients(commandOut);
 				
 				}
 
