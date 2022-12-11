@@ -13,7 +13,6 @@ public class RowHandler implements Runnable{
 	//Row rowsArray[];
 	private Boolean carsMoving;
 	private int y;
-	private Row rowArray[];
 	private Thread thread;
 	private OutputStream outStream;
 	private PrintWriter out;
