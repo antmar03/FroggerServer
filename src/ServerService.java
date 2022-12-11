@@ -101,10 +101,16 @@ public class ServerService implements Runnable{
 				case "LOSE":
 					rHandler.stopMovingCars();
 					rHandler2.stopMovingCars();
+					ConnectToDatabase.getInstance(cat, "Anthony").setPlayerScore("Anthony", ConnectToDatabase.getInstance(cat, "Anthony").getPlayerScore("Anthony") - 50);
+					sendCommandToClients("UPDATE " + ConnectToDatabase.getInstance(cat, "Anthony").getPlayerScore("Anthony"));
 				break;
+				
 				case "WIN":
 					rHandler.stopMovingCars();
 					rHandler2.stopMovingCars();
+					ConnectToDatabase.getInstance(cat, "Anthony").setPlayerScore("Anthony", ConnectToDatabase.getInstance(cat, "Anthony").getPlayerScore("Anthony") + 50);
+					sendCommandToClients("UPDATE " + ConnectToDatabase.getInstance(cat, "Anthony").getPlayerScore("Anthony"));
+					
 				break;
 				}
 				
